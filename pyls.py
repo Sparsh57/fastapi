@@ -17,7 +17,12 @@ parser.add_argument(
 )
 
 args = parser.parse_args()
+
 def main(args):
+    """
+    Processes the whole program and assigns it to functions
+    :param args:
+    """
     lines = getDescriptionsOfFilesInDir(args.dirname)
     result_list = formatResults(lines)
     displayResults(result_list)
