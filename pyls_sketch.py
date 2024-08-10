@@ -42,8 +42,8 @@ args = parser.parse_args()
 
 def main(args):
     results = getDescriptionsOfFilesInDir(args.dirname)
-    lines = formatResults(results, long_format, filetype)
-    printResults(lines)
+    lines = formatResults(results, args.long_format, args.filetype)
+    displayResults(lines)
 
 
 def getDescriptionsOfFilesInDir(dirname):
