@@ -24,11 +24,21 @@ parser.add_argument(
     action="store_true",
 )
 
-# Now, `args` has two fields that control the input gathering step
+parser.add_argument(
+    "-l",
+    "--long-format",
+    help="Presents more details about files in columnar format",
+    action="store_true",
+)
+
+
+# Now, `args` has three fields that control the input gathering step
 # and the presentation modes.
 #
 # .dirname   :: str
 # .filetype :: bool
+# .long_format :: bool
+
 
 args = parser.parse_args()
 
@@ -39,7 +49,7 @@ def main(args):
     :param args:
     """
     lines = getDescriptionsOfFilesInDir(args.dirname)
-    result_list = formatResults(lines, args.filetype)
+    result_list = formatResults(lines, args.long_format, args.filetype)
     displayResults(result_list)
 
 
@@ -97,7 +107,7 @@ def getDescriptionsOfFilesInDir(dirname):
     return descriptions
 
 
-def formatResults(results, filetype):
+def formatResults(results, long_format, filetype):
     """
     Takes a list of file descriptions and display control flags
     and returns a list of formatted strings, one per line of output.
@@ -109,10 +119,17 @@ def formatResults(results, filetype):
     """
     # Ensure results is a list of dictionaries
     assert isinstance(results, list), "results should be a list"
+    assert isinstance(long_format, bool), "Long_format should be a boolean"
     assert isinstance(filetype, bool), "filetype should be a boolean"
 
     list_result = []
-    if filetype:
+    if long_format:
+        for i in results:
+            filesize = str(i["filesize"])
+            modtime = str(i["modtime"])
+            filename = i["filename"]
+            list_result.append(modtime + "\t" + filesize + "\t" + filename)
+    elif filetype:
         for i in results:
             if i["filetype"] == 'd':
                 filename = i["filename"] + "/"
