@@ -5,6 +5,7 @@ import pytest
 from datetime import datetime
 from pyls import getDescriptionsOfFilesInDir, formatResults, displayResults
 
+
 def test_getDescriptionsOfFilesInDir(tmpdir):
     # Create a sample file and directory
     sample_file = tmpdir.join("test_file.txt")
@@ -21,6 +22,7 @@ def test_getDescriptionsOfFilesInDir(tmpdir):
     assert results[1]["filename"] == "test_dir"
     assert results[1]["filetype"] == "d"
 
+
 def test_formatResults():
     # Sample input
     sample_results = [
@@ -34,6 +36,7 @@ def test_formatResults():
     # Check the output
     assert formatted == ["file1.txt", "dir1"]
 
+
 def test_displayResults(capsys):
     # Sample input
     sample_lines = ["file1.txt", "dir1"]
@@ -46,4 +49,3 @@ def test_displayResults(capsys):
 
     # Check the output
     assert captured.out == "file1.txt\n" + "dir1\n"
-

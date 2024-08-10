@@ -42,6 +42,11 @@ def getDescriptionsOfFilesInDir(dirname):
     "modtime" = Last modified time of the file as a `datetime` object.
     "filesize" = Number of bytes in the file.
     """
+
+    # Ensure the argument is a string and that it represents an existing directory
+    assert isinstance(dirname, str), "dirname should be a string"
+    assert os.path.isdir(dirname), "dirname should be an existing directory"
+
     descriptions = []
 
     # Iterate over all items in the directory
@@ -86,6 +91,9 @@ def formatResults(results):
     Outputs:
     List of strings.
     """
+    # Ensure results is a list of dictionaries
+    assert isinstance(results, list), "results should be a list"
+
     list_result = []
     for i in results:
         filename = i["filename"]
@@ -102,6 +110,9 @@ def displayResults(lines):
     Output:
     On standard output
     """
+    # Ensure lines is a list of strings
+    assert isinstance(lines, list), "lines should be a list"
+
     for line in lines:
         print(line)
 
