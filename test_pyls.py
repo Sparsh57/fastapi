@@ -26,15 +26,18 @@ def test_getDescriptionsOfFilesInDir(tmpdir):
 def test_formatResults():
     # Sample input
     sample_results = [
-        {"filename": "file1.txt"},
-        {"filename": "dir1"}
+        {"filename": "file1.txt", "filetype": "f"},
+        {"filename": "dir1", "filetype": "d"},
+        {"filename": "exec.sh", "filetype": "x"}
     ]
 
-    # Call the function
-    formatted = formatResults(sample_results)
+    # Call the function with filetype flag
+    formatted_with_flag = formatResults(sample_results, True)
+    assert formatted_with_flag == ["file1.txt", "dir1/", "exec.sh*"]
 
-    # Check the output
-    assert formatted == ["file1.txt", "dir1"]
+    # Call the function without filetype flag
+    formatted_without_flag = formatResults(sample_results, False)
+    assert formatted_without_flag == ["file1.txt", "dir1", "exec.sh"]
 
 
 def test_displayResults(capsys):

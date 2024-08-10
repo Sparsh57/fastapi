@@ -16,7 +16,22 @@ parser.add_argument(
     default=".",
 )
 
+parser.add_argument(
+    "-F",
+    "--filetype",
+    help="""Adds an extra character to the end of the printed
+                            filename that indicates its type.""",
+    action="store_true",
+)
+
+# Now, `args` has two fields that control the input gathering step
+# and the presentation modes.
+#
+# .dirname   :: str
+# .filetype :: bool
+
 args = parser.parse_args()
+
 
 def main(args):
     """
@@ -24,8 +39,9 @@ def main(args):
     :param args:
     """
     lines = getDescriptionsOfFilesInDir(args.dirname)
-    result_list = formatResults(lines)
+    result_list = formatResults(lines, args.filetype)
     displayResults(result_list)
+
 
 def getDescriptionsOfFilesInDir(dirname):
     """
@@ -43,8 +59,7 @@ def getDescriptionsOfFilesInDir(dirname):
     "filesize" = Number of bytes in the file.
     """
 
-    # Ensure the argument is a string and that it represents an existing directory
-    assert isinstance(dirname, str), "dirname should be a string"
+    # Ensure the argument represents an existing directory
     assert os.path.isdir(dirname), "dirname should be an existing directory"
 
     descriptions = []
@@ -81,7 +96,8 @@ def getDescriptionsOfFilesInDir(dirname):
 
     return descriptions
 
-def formatResults(results):
+
+def formatResults(results, filetype):
     """
     Takes a list of file descriptions and display control flags
     and returns a list of formatted strings, one per line of output.
@@ -93,12 +109,24 @@ def formatResults(results):
     """
     # Ensure results is a list of dictionaries
     assert isinstance(results, list), "results should be a list"
+    assert isinstance(filetype, bool), "filetype should be a boolean"
 
     list_result = []
-    for i in results:
-        filename = i["filename"]
-        list_result.append(filename)
+    if filetype:
+        for i in results:
+            if i["filetype"] == 'd':
+                filename = i["filename"] + "/"
+            elif i["filetype"] == 'x':
+                filename = i["filename"] + "*"
+            else:
+                filename = i["filename"]
+            list_result.append(filename)
+    else:
+        for i in results:
+            filename = i["filename"]
+            list_result.append(filename)
     return list_result
+
 
 def displayResults(lines):
     """
@@ -115,6 +143,7 @@ def displayResults(lines):
 
     for line in lines:
         print(line)
+
 
 if __name__ == '__main__':
     main(args)
