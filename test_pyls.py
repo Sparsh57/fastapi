@@ -19,6 +19,21 @@ def test_getDescriptionsOfFilesInDir(tmpdir):
     assert results[1]["filename"] == "test_dir"
     assert results[1]["filetype"] == "d"
 
+def test_formatResults_long_format_and_filetype():
+    # Sample input
+    sample_results = [
+        {"filename": "file1.txt", "filetype": "f", "filesize": 1234, "modtime": datetime(2024, 1, 1, 10, 0, 0)},
+        {"filename": "dir1", "filetype": "d", "filesize": 0, "modtime": datetime(2024, 1, 1, 11, 0, 0)},
+        {"filename": "exec.sh", "filetype": "x", "filesize": 456, "modtime": datetime(2024, 1, 1, 12, 0, 0)},
+    ]
+
+    # Call the function with both long format and filetype flags
+    formatted = formatResults(sample_results, long_format=True, filetype=True)
+    assert formatted == [
+        "2024-01-01 10:00:00\t1234\tfile1.txt",
+        "2024-01-01 11:00:00\t0\tdir1/",
+        "2024-01-01 12:00:00\t456\texec.sh*"
+    ]
 
 def test_formatResults_long_format():
     # Sample input

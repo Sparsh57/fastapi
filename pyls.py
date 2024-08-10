@@ -123,7 +123,18 @@ def formatResults(results, long_format, filetype):
     assert isinstance(filetype, bool), "filetype should be a boolean"
 
     list_result = []
-    if long_format:
+    if long_format and filetype:
+        for i in results:
+            filesize = str(i["filesize"])
+            modtime = str(i["modtime"])
+            if i["filetype"] == 'd':
+                filename = i["filename"] + "/"
+            elif i["filetype"] == 'x':
+                filename = i["filename"] + "*"
+            else:
+                filename = i["filename"]
+            list_result.append(modtime + "\t" + filesize + "\t" + filename)
+    elif long_format:
         for i in results:
             filesize = str(i["filesize"])
             modtime = str(i["modtime"])
