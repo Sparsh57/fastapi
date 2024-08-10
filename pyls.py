@@ -43,13 +43,13 @@ parser.add_argument(
 args = parser.parse_args()
 
 
-def main(args):
+def main(arguments):
     """
     Processes the whole program and assigns it to functions
-    :param args:
+    :param arguments:
     """
-    lines = getDescriptionsOfFilesInDir(args.dirname)
-    result_list = formatResults(lines, args.long_format, args.filetype)
+    lines = getDescriptionsOfFilesInDir(arguments.dirname)
+    result_list = formatResults(lines, arguments.long_format, arguments.filetype)
     displayResults(result_list)
 
 
@@ -59,7 +59,11 @@ def getDescriptionsOfFilesInDir(dirname):
     and constructs a list of dicts with the required
     information. Always fetches all the details required for
     "long format" presentation for simplicity.
+
     dirname = The directory whose contents are to be listed.
+    long_format = True if the user has asked for the long format.
+    filetype = True if the user has asked for file type info as well.
+
     The return value is a list of dictionaries each with the following
     keys -
     "filename" = The name of the file.
@@ -114,6 +118,9 @@ def formatResults(results, long_format, filetype):
 
     Inputs -
     results = List of dictionaries, like returned by getDescriptionsOfFilesInDir()
+    long_format = Boolean that indicates long format output.
+    filetype = Boolean that indicates ask for extra type descriptor character at end.
+
     Outputs:
     List of strings.
     """
