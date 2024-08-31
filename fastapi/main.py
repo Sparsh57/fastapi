@@ -22,10 +22,10 @@ class Database:
         except sqlite3.Error as e:
             print(f"Error initializing database: {e}")
 
-    def add(self, text, status):
+    def add(self, id, text, status):
         try:
             with closing(self.db.cursor()) as cur:
-                cur.execute("INSERT INTO todolist (text, status) VALUES (?, ?)", (text, status))
+                cur.execute("INSERT INTO todolist (id, text, status) VALUES (?, ?, ?)", (id, text, status))
                 self.db.commit()
         except sqlite3.Error as e:
             print(f"Error adding item: {e}")
@@ -95,12 +95,14 @@ db.initialize_database()
 @app.get("/todolist")
 def todolist(filter: str = "all"):
     if filter == "completed":
-        return db.extract_status("completed")
-    if filter == "pending":
-        return db.extract_status("pending")
-    if filter == "all":
-        return db.extract()
-    raise fastapi.HTTPException(status_code=400, detail="Invalid filter name")
+        result = db.extract_status("completed")
+    elif filter == "pending":
+        result = db.extract_status("pending")
+    elif filter == "all":
+        result = db.extract()
+    else:
+        raise fastapi.HTTPException(status_code=400, detail="Invalid filter name")
+    return result
 
 
 def get_item_by_id(id: int):
@@ -126,9 +128,8 @@ def success(**kwargs):
 
 @app.post("/todolist")
 def new_item(item: TodoItem):
-    item.text = TodoItem.validate_text(item.text)
     newid = db.last_id() + 1
-    db.add(item.text, "pending")
+    db.add(newid, item.text, "pending")
     return success(url=f"/todolist/{newid}")
 
 
@@ -136,17 +137,13 @@ class ItemMods(BaseModel):
     text: Optional[str] = None
     done: Optional[str] = None
 
-    def validate_and_update(self, item):
-        self.text = self.text.strip() if self.text else item['text']
-        self.text = TodoItem.validate_text(self.text)
-        self.done = "completed" if self.done else "pending"
-
 
 @app.put("/todolist/{id}")
 def mod_item(id: int, mods: ItemMods):
     item = get_item_by_id(id)
-    mods.validate_and_update(item)
-    db.update(id, mods.text, mods.done)
+    updated_text = mods.text if mods.text is not None else item['text']
+    updated_status = mods.done
+    db.update(id, updated_text, updated_status)
     return success()
 
 
