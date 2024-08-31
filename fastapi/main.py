@@ -1,6 +1,6 @@
 import fastapi
 from typing import *
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 import sqlite3
 from contextlib import closing
 
@@ -21,6 +21,7 @@ class Database:
                 self.db.commit()
         except sqlite3.Error as e:
             print(f"Error initializing database: {e}")
+            raise fastapi.HTTPException(status_code=500, detail="Failed to initialize the database")
 
     def add(self, id, text, status):
         try:
@@ -29,6 +30,7 @@ class Database:
                 self.db.commit()
         except sqlite3.Error as e:
             print(f"Error adding item: {e}")
+            raise e
 
     def extract(self):
         try:
@@ -77,6 +79,7 @@ class Database:
                 self.db.commit()
         except sqlite3.Error as e:
             print(f"Error removing item: {e}")
+            raise e
 
     def update(self, id, text, status):
         try:
@@ -85,6 +88,7 @@ class Database:
                 self.db.commit()
         except sqlite3.Error as e:
             print(f"Error updating item: {e}")
+            raise e
 
 
 app = fastapi.FastAPI()
@@ -93,12 +97,12 @@ db.initialize_database()
 
 
 @app.get("/todolist")
-def todolist(filter: str = "all"):
-    if filter == "completed":
+def todolist(filtered: str = "all"):
+    if filtered == "completed":
         result = db.extract_status("completed")
-    elif filter == "pending":
+    elif filtered == "pending":
         result = db.extract_status("pending")
-    elif filter == "all":
+    elif filtered == "all":
         result = db.extract()
     else:
         raise fastapi.HTTPException(status_code=400, detail="Invalid filter name")
@@ -120,6 +124,11 @@ def get_item(id: int):
 class TodoItem(BaseModel):
     text: str
 
+    @field_validator('text')
+    def validate(cls, value):
+        if value is not None and not value.strip():
+            raise ValueError('Text must not be empty')
+        return value
 
 
 def success(**kwargs):
@@ -137,12 +146,24 @@ class ItemMods(BaseModel):
     text: Optional[str] = None
     done: Optional[str] = None
 
+    @field_validator('text')
+    def validate_text(cls, value):
+        if value is not None and not value.strip():
+            raise ValueError('Text must not be empty')
+        return value
+
+    @field_validator('done')
+    def validate_status(cls, value):
+        if value not in {'pending', 'completed'}:
+            raise ValueError("Status must be 'pending' or 'completed'")
+        return value
+
 
 @app.put("/todolist/{id}")
 def mod_item(id: int, mods: ItemMods):
     item = get_item_by_id(id)
     updated_text = mods.text if mods.text is not None else item['text']
-    updated_status = mods.done
+    updated_status = mods.done if mods.done is not None else "pending"
     db.update(id, updated_text, updated_status)
     return success()
 
